@@ -1,172 +1,185 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-public class floorplan {
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SNAP {
     private JFrame frame;
     private JPanel floorPlanPanel;
 
-    public floorplan() {
-        frame = new JFrame("2D Floor Plan App");
-        floorPlanPanel = new JPanel(null);  // Use null layout to allow manual positioning
+    public SNAP() {
+        frame = new JFrame("SNAP - 2D Floor Plan App");
+        floorPlanPanel = new JPanel(null);  // Null layout for manual positioning
         floorPlanPanel.setBackground(Color.BLACK);
-        JPanel buttonPanel = new JPanel(new FlowLayout());
 
-        // Create a button for adding rooms
-        JButton bedroomButton=new JButton("Add Bedroom");
-        JButton bathroomButton=new JButton("Add bathroom");
-        JButton kitchenButton=new JButton("Add kitchen");
-        JButton sofa=new JButton("Add sofa");
-        JButton bathtub=new JButton("Add bathtub");
-        JButton commode=new JButton("Add Commode");
-        JButton bed=new JButton("Add bed");
-        JButton livingButton=new JButton("Add Living Room");
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        
-        // Set a preferred size to control the width of the button panel
-        buttonPanel.setPreferredSize(new Dimension(150, 100));
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(bedroomButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(bathroomButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(kitchenButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(livingButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(sofa);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(bathtub);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(commode);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        buttonPanel.add(bed);
-        
-            bedroomButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Create a new room with specific color and size
-                        Rooms newRoom = new Rooms(Color.ORANGE, 480, 270);
-                        floorPlanPanel.add(newRoom);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                
-                livingButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Create a new room with specific color and size
-                        Rooms newRoom = new Rooms(Color.GREEN, 480, 270);
-                        floorPlanPanel.add(newRoom);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                bathroomButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Create a new room with specific color and size
-                        Rooms newRoom = new Rooms(Color.RED, 480, 270);
-                        floorPlanPanel.add(newRoom);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                kitchenButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Create a new room with specific color and size
-                        Rooms newRoom = new Rooms(Color.BLUE, 480, 270);
-                        floorPlanPanel.add(newRoom);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                sofa.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Load furniture icon (replace with the path to your image)
-                        ImageIcon sofaIcon = new ImageIcon("bed.png");
-                        
-                        // Create a new Furniture item (e.g., sofa)
-                        Furniture newSofa = new Furniture(sofaIcon, 100, 100);  // Set size accordingly
-                        
-                        // Add the furniture to the floorPlanPanel
-                        floorPlanPanel.add(newSofa);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                bathtub.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Load furniture icon (replace with the path to your image)
-                        ImageIcon sofaIcon = new ImageIcon("bathtub.png");
-                        
-                        // Create a new Furniture item (e.g., sofa)
-                        Furniture newSofa = new Furniture(sofaIcon, 150, 100);  // Set size accordingly
-                        
-                        // Add the furniture to the floorPlanPanel
-                        floorPlanPanel.add(newSofa);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                commode.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Load furniture icon (replace with the path to your image)
-                        ImageIcon sofaIcon = new ImageIcon("commode.png");
-                        
-                        // Create a new Furniture item (e.g., sofa)
-                        Furniture newSofa = new Furniture(sofaIcon, 80, 80);  // Set size accordingly
-                        
-                        // Add the furniture to the floorPlanPanel
-                        floorPlanPanel.add(newSofa);
-                        floorPlanPanel.repaint();
-                    }
-                });
-                bed.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Load furniture icon (replace with the path to your image)
-                        ImageIcon sofaIcon = new ImageIcon("bed1.png");
-                        
-                        // Create a new Furniture item (e.g., sofa)
-                        Furniture newSofa = new Furniture(sofaIcon, 100, 100);  // Set size accordingly
-                        
-                        // Add the furniture to the floorPlanPanel
-                        floorPlanPanel.add(newSofa);
-                        floorPlanPanel.repaint();
-                    }
-                });
-
-                
-            
-            
+        ControlPanel controlPanel = new ControlPanel(floorPlanPanel);
 
         // Layout the frame
         frame.setLayout(new BorderLayout());
-        frame.add(buttonPanel, BorderLayout.WEST);  // Add the button panel to the top
-        frame.add(new JScrollPane(floorPlanPanel), BorderLayout.CENTER);  // Add the floor plan panel in the center
+        frame.add(controlPanel.getPanel(), BorderLayout.WEST);  // Add control panel to the left
+        frame.add(new JScrollPane(floorPlanPanel), BorderLayout.CENTER);  // Floor plan in the center
         frame.setSize(1920, 1080);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-            }
+    }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(floorplan::new);
+        SwingUtilities.invokeLater(SNAP::new);
     }
 }
+
+class ControlPanel {
+    private JPanel buttonPanel;
+    private List<JComponent> layoutComponents;
+
+    public ControlPanel(JPanel floorPlanPanel) {
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setPreferredSize(new Dimension(150, 100));
+        layoutComponents = new ArrayList<>();
+
+        // Create buttons and add to panel
+        JButton bedroomButton = createRoomButton("Add Bedroom", Color.ORANGE, floorPlanPanel);
+        JButton bathroomButton = createRoomButton("Add Bathroom", Color.RED, floorPlanPanel);
+        JButton kitchenButton = createRoomButton("Add Kitchen", Color.BLUE, floorPlanPanel);
+        JButton livingButton = createRoomButton("Add Living Room", Color.GREEN, floorPlanPanel);
+
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(bedroomButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(bathroomButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(kitchenButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(livingButton);
+
+        JButton sofaButton = createFurnitureButton("Add Sofa", "sofa.png", floorPlanPanel);
+        JButton bathtubButton = createFurnitureButton("Add Bathtub", "bathtub.png", floorPlanPanel);
+        JButton commodeButton = createFurnitureButton("Add Commode", "commode.png", floorPlanPanel);
+        JButton bedButton = createFurnitureButton("Add Bed", "bed.png", floorPlanPanel);
+
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(sofaButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(bathtubButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(commodeButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(bedButton);
+
+        JButton saveButton = new JButton("Save Layout");
+        saveButton.addActionListener(e -> saveLayout());
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(saveButton);
+    }
+
+    private JButton createRoomButton(String label, Color color, JPanel floorPlanPanel) {
+        JButton button = new JButton(label);
+        button.addActionListener(e -> {
+            // Prompt the user for dimensions
+            Dimension dimension = getDimensionsFromUser("Enter dimensions for " + label);
+            if (dimension != null) {
+                Rooms newRoom = new Rooms(color, dimension.width, dimension.height, layoutComponents, floorPlanPanel);
+                floorPlanPanel.add(newRoom);
+                floorPlanPanel.setComponentZOrder(newRoom, floorPlanPanel.getComponentCount() - 1);
+                layoutComponents.add(newRoom);
+                floorPlanPanel.repaint();
+            }
+        });
+        return button;
+    }
+
+    private JButton createFurnitureButton(String label, String iconPath, JPanel floorPlanPanel) {
+        JButton button = new JButton(label);
+        button.addActionListener(e -> {
+            // Prompt the user for dimensions
+            Dimension dimension = getDimensionsFromUser("Enter dimensions for " + label);
+            if (dimension != null) {
+                ImageIcon icon = new ImageIcon(iconPath);
+                Furniture furniture = new Furniture(icon, dimension.width, dimension.height, layoutComponents, floorPlanPanel);
+                floorPlanPanel.add(furniture);
+                floorPlanPanel.setComponentZOrder(furniture, 0);
+                layoutComponents.add(furniture);
+                floorPlanPanel.repaint();
+            }
+        });
+        return button;
+    }
+
+    private Dimension getDimensionsFromUser(String message) {
+        JPanel panel = new JPanel(new GridLayout(2, 2));
+        JTextField widthField = new JTextField();
+        JTextField heightField = new JTextField();
+
+        panel.add(new JLabel("Width:"));
+        panel.add(widthField);
+        panel.add(new JLabel("Height:"));
+        panel.add(heightField);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, message, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                int width = Integer.parseInt(widthField.getText().trim());
+                int height = Integer.parseInt(heightField.getText().trim());
+                if (width > 0 && height > 0) {
+                    return new Dimension(width, height);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Dimensions must be positive integers.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Please enter valid numbers for dimensions.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return null;
+    }
+
+    private Component createRigidArea() {
+        return Box.createRigidArea(new Dimension(0, 15));
+    }
+
+    private void saveLayout() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("layout.txt"))) {
+            for (JComponent comp : layoutComponents) {
+                if (comp instanceof Rooms) {
+                    Rooms room = (Rooms) comp;
+                    writer.write("Room," + room.getBounds().x + "," + room.getBounds().y + "," + room.getWidth() + "," + room.getHeight() + "," + room.getBackground().getRGB());
+                } else if (comp instanceof Furniture) {
+                    Furniture furniture = (Furniture) comp;
+                    writer.write("Furniture," + furniture.getBounds().x + "," + furniture.getBounds().y + "," + furniture.getWidth() + "," + furniture.getHeight());
+                }
+                writer.newLine();
+            }
+            JOptionPane.showMessageDialog(null, "Layout saved successfully!", "Save Layout", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Error saving layout: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public JPanel getPanel() {
+        return buttonPanel;
+    }
+}
+
 class Furniture extends JLabel {
     private int width, height;
     private Point initialClick;
-    public Furniture(ImageIcon icon, int width, int height) {
+    private List<JComponent> layoutComponents;
+    private JPanel parentPanel;
+
+    public Furniture(ImageIcon icon, int width, int height, List<JComponent> layoutComponents, JPanel parentPanel) {
         super(icon);
         this.width = width;
         this.height = height;
+        this.layoutComponents = layoutComponents;
+        this.parentPanel = parentPanel;
         this.setBounds(50, 50, width, height);
         initializeMouseListeners();
     }
+
     private void initializeMouseListeners() {
-        // MouseListener for detecting mouse press and release
         this.addMouseListener(new MouseAdapter() {
-
-
             @Override
             public void mousePressed(MouseEvent e) {
                 initialClick = e.getPoint();
@@ -178,79 +191,71 @@ class Furniture extends JLabel {
                 int thisX = Furniture.this.getLocation().x;
                 int thisY = Furniture.this.getLocation().y;
 
-                // Determine how much the mouse moved since the initial click
                 int xMoved = e.getX() - initialClick.x;
                 int yMoved = e.getY() - initialClick.y;
 
-                // Move the furniture to this position
                 int nextX = thisX + xMoved;
                 int nextY = thisY + yMoved;
 
-                // Reposition the furniture
                 Furniture.this.setLocation(nextX, nextY);
             }
         });
     }
 
+    
 }
 
- 
-class Rooms extends JPanel
-{
+class Rooms extends JPanel {
     private int width, height;
-    private Point initialClick;  // Stores initial click point
-    private boolean dragged;
-    Rooms(Color color,int width,int height)
-    {
-        this.width=width;
-        this.height=height;
+    private Point initialClick;
+    private List<JComponent> layoutComponents;
+    private JPanel parentPanel;
+
+    public Rooms(Color color, int width, int height, List<JComponent> layoutComponents, JPanel parentPanel) {
+        this.width = width;
+        this.height = height;
+        this.layoutComponents = layoutComponents;
+        this.parentPanel = parentPanel;
         this.setBackground(color);
-        this.setBounds(50,50,width,height);
-        initialmouseListeners();
+        this.setBounds(50, 50, width, height);
+        initializeMouseListeners();
     }
-    public void addFurniture(Furniture furniture) {
-        this.add(furniture);
-        this.repaint();
-    }
-    
-    private void initialmouseListeners() {
-        // MouseListener for detecting mouse press and release
+
+    private void initializeMouseListeners() {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 initialClick = e.getPoint();
-                dragged = true;
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                dragged = false;
             }
         });
+        this.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                int thisX = Rooms.this.getLocation().x;
+                int thisY = Rooms.this.getLocation().y;
 
-this.addMouseMotionListener(new MouseMotionAdapter()
-{
-    @Override
-    public void mouseDragged(MouseEvent e)
-    {
-        if(dragged)
-        {
-            int x=Rooms.this.getLocation().x;
-            int y = Rooms.this.getLocation().y;
-            int motion_x=e.getX()-initialClick.x;
-            int motion_y=e.getY()-initialClick.y;
-            int final_x=x+motion_x;
-            int final_y=y+motion_y;
-            Rooms.this.setLocation(final_x,final_y);
-        }
+                int xMoved = e.getX() - initialClick.x;
+                int yMoved = e.getY() - initialClick.y;
+
+                int nextX = thisX + xMoved;
+                int nextY = thisY + yMoved;
+
+                Rooms.this.setLocation(nextX, nextY);
+
+                if (!isValidPosition(Rooms.this)) {
+                    Rooms.this.setLocation(thisX, thisY);
+                }
+            }
+        });
     }
-});
-}
-@Override
-protected void paintComponent(Graphics g)
-{
-    super.paintComponent(g);
-    g.drawRect(0, 0, width - 1, height - 1);
-}
 
+    private boolean isValidPosition(JComponent comp) {
+        for (JComponent other : layoutComponents) {
+            if (other != comp && comp.getBounds().intersects(other.getBounds())) {
+                return false;
+            }
+        }
+        java.awt.Rectangle bounds = new java.awt.Rectangle(comp.getBounds());
+        return bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= parentPanel.getWidth() && bounds.y + bounds.height <= parentPanel.getHeight();
+    }
 }
