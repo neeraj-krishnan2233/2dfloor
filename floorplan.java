@@ -1,7 +1,10 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.io.File;
+import javax.sound.sampled.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,15 +14,21 @@ public class SNAP {
 
     public SNAP() {
         frame = new JFrame("SNAP - 2D Floor Plan App");
-        floorPlanPanel = new JPanel(null);  // Null layout for manual positioning
+        floorPlanPanel = new JPanel(null);  
         floorPlanPanel.setBackground(Color.BLACK);
-
+        try {
+            
+            Image icon = ImageIO.read(new File("snap.png")); 
+            frame.setIconImage(icon); 
+        } catch (IOException e) {
+            System.out.println("Icon image not found!");
+        }
         ControlPanel controlPanel = new ControlPanel(floorPlanPanel);
 
-        // Layout the frame
+        
         frame.setLayout(new BorderLayout());
-        frame.add(controlPanel.getPanel(), BorderLayout.WEST);  // Add control panel to the left
-        frame.add(new JScrollPane(floorPlanPanel), BorderLayout.CENTER);  // Floor plan in the center
+        frame.add(controlPanel.getPanel(), BorderLayout.WEST);  
+        frame.add(new JScrollPane(floorPlanPanel), BorderLayout.CENTER);  
         frame.setSize(1920, 1080);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -40,12 +49,11 @@ class ControlPanel {
         buttonPanel.setPreferredSize(new Dimension(150, 100));
         layoutComponents = new ArrayList<>();
 
-        // Create buttons and add to panel
-        JButton bedroomButton = createRoomButton("Add Bedroom", Color.ORANGE, floorPlanPanel);
+        
+        JButton bedroomButton = createRoomButton("Add Bedroom", Color.PINK, floorPlanPanel);
         JButton bathroomButton = createRoomButton("Add Bathroom", Color.RED, floorPlanPanel);
         JButton kitchenButton = createRoomButton("Add Kitchen", Color.BLUE, floorPlanPanel);
         JButton livingButton = createRoomButton("Add Living Room", Color.GREEN, floorPlanPanel);
-
         buttonPanel.add(createRigidArea());
         buttonPanel.add(bedroomButton);
         buttonPanel.add(createRigidArea());
@@ -57,8 +65,15 @@ class ControlPanel {
 
         JButton sofaButton = createFurnitureButton("Add Sofa", "sofa.png", floorPlanPanel);
         JButton bathtubButton = createFurnitureButton("Add Bathtub", "bathtub.png", floorPlanPanel);
-        JButton commodeButton = createFurnitureButton("Add Commode", "commode.png", floorPlanPanel);
+        JButton commodeButton = createFurnitureButton("Add Commode", "poop.png", floorPlanPanel);
         JButton bedButton = createFurnitureButton("Add Bed", "bed.png", floorPlanPanel);
+        JButton diningtableButton = createFurnitureButton("Add Dining table", "d table.png", floorPlanPanel);
+        JButton TV = createFurnitureButton("Add TV", "TV.png", floorPlanPanel);
+        JButton cb = createFurnitureButton("Add Cupboard", "cb.png", floorPlanPanel);
+        JButton kitchen = createFurnitureButton("Add Stove", "kitchen.png", floorPlanPanel);
+        JButton piano = createFurnitureButton("Add -----", "piano.png", floorPlanPanel);
+        
+
 
         buttonPanel.add(createRigidArea());
         buttonPanel.add(sofaButton);
@@ -68,7 +83,16 @@ class ControlPanel {
         buttonPanel.add(commodeButton);
         buttonPanel.add(createRigidArea());
         buttonPanel.add(bedButton);
-
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(diningtableButton);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(TV);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(cb);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(kitchen);
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(piano);
         JButton saveButton = new JButton("Save Layout");
         saveButton.addActionListener(e -> saveLayout());
         buttonPanel.add(createRigidArea());
@@ -78,7 +102,7 @@ class ControlPanel {
     private JButton createRoomButton(String label, Color color, JPanel floorPlanPanel) {
         JButton button = new JButton(label);
         button.addActionListener(e -> {
-            // Prompt the user for dimensions
+            
             Dimension dimension = getDimensionsFromUser("Enter dimensions for " + label);
             if (dimension != null) {
                 Rooms newRoom = new Rooms(color, dimension.width, dimension.height, layoutComponents, floorPlanPanel);
@@ -90,11 +114,9 @@ class ControlPanel {
         });
         return button;
     }
-
     private JButton createFurnitureButton(String label, String iconPath, JPanel floorPlanPanel) {
         JButton button = new JButton(label);
         button.addActionListener(e -> {
-            // Prompt the user for dimensions
             Dimension dimension = getDimensionsFromUser("Enter dimensions for " + label);
             if (dimension != null) {
                 ImageIcon icon = new ImageIcon(iconPath);
@@ -103,9 +125,27 @@ class ControlPanel {
                 floorPlanPanel.setComponentZOrder(furniture, 0);
                 layoutComponents.add(furniture);
                 floorPlanPanel.repaint();
+    
+                // Play music if the piano is added
+                if (label.equals("Add -----")) {  // Replace "Add -----" with your button label for the piano
+                    playPianoMusic("pianomusic.wav");
+                }
             }
         });
         return button;
+    }
+    
+    private void playPianoMusic(String audioFilePath) {
+        try {
+            File audioFile = new File(audioFilePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error playing music: " + ex.getMessage(), "Audio Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private Dimension getDimensionsFromUser(String message) {
