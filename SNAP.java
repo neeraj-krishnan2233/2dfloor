@@ -47,13 +47,22 @@ class ControlPanel {
         buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setPreferredSize(new Dimension(150, 100));
+        buttonPanel.setBackground(Color.darkGray);
         layoutComponents = new ArrayList<>();
 
         
         JButton bedroomButton = createRoomButton("Add Bedroom", Color.PINK, floorPlanPanel);
+        bedroomButton.setBackground(Color.BLACK);
+        bedroomButton.setForeground(Color.GREEN);
         JButton bathroomButton = createRoomButton("Add Bathroom", Color.RED, floorPlanPanel);
+        bathroomButton.setBackground(Color.BLACK);
+        bathroomButton.setForeground(Color.GREEN);
         JButton kitchenButton = createRoomButton("Add Kitchen", Color.BLUE, floorPlanPanel);
-        JButton livingButton = createRoomButton("Add Living Room", Color.GREEN, floorPlanPanel);
+        kitchenButton.setBackground(Color.BLACK);
+        kitchenButton.setForeground(Color.GREEN);
+        JButton livingButton = createRoomButton("Add Living Room", Color.ORANGE, floorPlanPanel);
+        livingButton.setBackground(Color.BLACK);
+        livingButton.setForeground(Color.GREEN);
         buttonPanel.add(createRigidArea());
         buttonPanel.add(bedroomButton);
         buttonPanel.add(createRigidArea());
@@ -64,14 +73,32 @@ class ControlPanel {
         buttonPanel.add(livingButton);
 
         JButton sofaButton = createFurnitureButton("Add Sofa", "sofa.png", floorPlanPanel);
+        sofaButton.setBackground(Color.BLACK);
+        sofaButton.setForeground(Color.GREEN);
         JButton bathtubButton = createFurnitureButton("Add Bathtub", "bathtub.png", floorPlanPanel);
+        bathtubButton.setBackground(Color.BLACK);
+        bathtubButton.setForeground(Color.GREEN);
         JButton commodeButton = createFurnitureButton("Add Commode", "poop.png", floorPlanPanel);
+        commodeButton.setBackground(Color.BLACK);
+        commodeButton.setForeground(Color.GREEN);
         JButton bedButton = createFurnitureButton("Add Bed", "bed.png", floorPlanPanel);
+        bedButton.setBackground(Color.BLACK);
+        bedButton.setForeground(Color.GREEN);
         JButton diningtableButton = createFurnitureButton("Add Dining table", "d table.png", floorPlanPanel);
+        diningtableButton.setBackground(Color.BLACK);
+        diningtableButton.setForeground(Color.GREEN);
         JButton TV = createFurnitureButton("Add TV", "TV.png", floorPlanPanel);
+        TV.setBackground(Color.BLACK);
+        TV.setForeground(Color.GREEN);
         JButton cb = createFurnitureButton("Add Cupboard", "cb.png", floorPlanPanel);
+        cb.setBackground(Color.BLACK);
+        cb.setForeground(Color.GREEN);
         JButton kitchen = createFurnitureButton("Add Stove", "kitchen.png", floorPlanPanel);
+        kitchen.setBackground(Color.BLACK);
+        kitchen.setForeground(Color.GREEN);
         JButton piano = createFurnitureButton("Add -----", "piano.png", floorPlanPanel);
+        piano.setBackground(Color.BLACK);
+        piano.setForeground(Color.GREEN);
         
 
 
@@ -94,6 +121,8 @@ class ControlPanel {
         buttonPanel.add(createRigidArea());
         buttonPanel.add(piano);
         JButton saveButton = new JButton("Save Layout");
+        saveButton.setBackground(Color.BLACK);
+        saveButton.setForeground(Color.GREEN);
         saveButton.addActionListener(e -> saveLayout());
         buttonPanel.add(createRigidArea());
         buttonPanel.add(saveButton);
@@ -207,6 +236,7 @@ class Furniture extends JLabel {
     private Point initialClick;
     private List<JComponent> layoutComponents;
     private JPanel parentPanel;
+    private int rotationAngle = 0; // Rotation state in degrees
 
     public Furniture(ImageIcon icon, int width, int height, List<JComponent> layoutComponents, JPanel parentPanel) {
         super(icon);
@@ -216,6 +246,7 @@ class Furniture extends JLabel {
         this.parentPanel = parentPanel;
         this.setBounds(50, 50, width, height);
         initializeMouseListeners();
+        initializeContextMenu();
     }
 
     private void initializeMouseListeners() {
@@ -242,9 +273,50 @@ class Furniture extends JLabel {
         });
     }
 
-    
-}
+    private void initializeContextMenu() {
+        JPopupMenu contextMenu = new JPopupMenu();
 
+        // Rotate Option
+        JMenuItem rotateItem = new JMenuItem("Rotate 90°");
+        rotateItem.addActionListener(e -> rotate());
+        contextMenu.add(rotateItem);
+
+        // Remove Option
+        JMenuItem removeItem = new JMenuItem("Remove");
+        removeItem.addActionListener(e -> remove());
+        contextMenu.add(removeItem);
+
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    contextMenu.show(Furniture.this, e.getX(), e.getY());
+                }
+            }
+        });
+    }
+
+    private void rotate() {
+        rotationAngle = (rotationAngle + 90) % 360;
+        this.setBounds(getX(), getY(), height, width); // Swap width and height
+        parentPanel.repaint();
+    }
+
+    private void remove() {
+        parentPanel.remove(this);
+        layoutComponents.remove(this);
+        parentPanel.repaint();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.rotate(Math.toRadians(rotationAngle), getWidth() / 2.0, getHeight() / 2.0);
+        g2d.drawImage(((ImageIcon) getIcon()).getImage(), 0, 0, getWidth(), getHeight(), null);
+        g2d.dispose();
+    }
+}
 class Rooms extends JPanel {
     private int width, height;
     private Point initialClick;
@@ -297,5 +369,15 @@ class Rooms extends JPanel {
         }
         java.awt.Rectangle bounds = new java.awt.Rectangle(comp.getBounds());
         return bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= parentPanel.getWidth() && bounds.y + bounds.height <= parentPanel.getHeight();
+    }
+    
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.GREEN);
+        g2d.setStroke(new BasicStroke(7)); // Wall thickness
+        g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1); // Draw border
     }
 }
