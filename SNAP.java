@@ -7,6 +7,9 @@ import java.io.File;
 import javax.sound.sampled.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 
 public class SNAP {
     private JFrame frame;
@@ -120,21 +123,95 @@ class ControlPanel {
         buttonPanel.add(kitchen);
         buttonPanel.add(createRigidArea());
         buttonPanel.add(piano);
-        JButton saveButton = new JButton("Save Layout");
-        saveButton.setBackground(Color.BLACK);
-        saveButton.setForeground(Color.GREEN);
-        saveButton.addActionListener(e -> saveLayout());
+        
         buttonPanel.add(createRigidArea());
-        buttonPanel.add(saveButton);
+        JButton saveAsPngButton = new JButton("Save as PNG");
+        saveAsPngButton.setBackground(Color.BLACK);
+        saveAsPngButton.setForeground(Color.GREEN);
+        saveAsPngButton.addActionListener(e -> saveAsPng(floorPlanPanel));
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(saveAsPngButton);
+        JButton loadButton = new JButton("Load Layout");
+        loadButton.setBackground(Color.BLACK);
+        loadButton.setForeground(Color.GREEN);
+        loadButton.addActionListener(e -> loadLayout(floorPlanPanel));
+        buttonPanel.add(createRigidArea());
+        buttonPanel.add(loadButton);
+    }
+    private void saveAsPng(JPanel floorPlanPanel) {
+        BufferedImage image = new BufferedImage(floorPlanPanel.getWidth(), floorPlanPanel.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        floorPlanPanel.paint(g2d);
+        g2d.dispose();
+        try {
+            ImageIO.write(image, "png", new File("floorplan.png"));
+            JOptionPane.showMessageDialog(null, "Layout saved as PNG!", "Save as PNG", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Error saving as PNG: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    // Load layout method
+    private void loadLayout(JPanel floorPlanPanel) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Layout Files", "txt"));
+        int result = fileChooser.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                floorPlanPanel.removeAll();
+                layoutComponents.clear();
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals("Room")) {
+                        int x = Integer.parseInt(parts[1]);
+                        int y = Integer.parseInt(parts[2]);
+                        int width = Integer.parseInt(parts[3]);
+                        int height = Integer.parseInt(parts[4]);
+                        Color color = new Color(Integer.parseInt(parts[5]));
+                        Rooms room = new Rooms(color, width, height, layoutComponents, floorPlanPanel);
+                        room.setBounds(x, y, width, height);
+                        floorPlanPanel.add(room);
+                        layoutComponents.add(room);
+                    } else if (parts[0].equals("Furniture")) {
+                        int x = Integer.parseInt(parts[1]);
+                        int y = Integer.parseInt(parts[2]);
+                        int width = Integer.parseInt(parts[3]);
+                        int height = Integer.parseInt(parts[4]);
+                        Furniture furniture = new Furniture(null, width, height, layoutComponents, floorPlanPanel);
+                        furniture.setBounds(x, y, width, height);
+                        floorPlanPanel.add(furniture);
+                        layoutComponents.add(furniture);
+                    }
+                }
+                floorPlanPanel.revalidate();
+                floorPlanPanel.repaint();
+                JOptionPane.showMessageDialog(null, "Layout loaded successfully!", "Load Layout", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException | NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Error loading layout: " + ex.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private JButton createRoomButton(String label, Color color, JPanel floorPlanPanel) {
         JButton button = new JButton(label);
         button.addActionListener(e -> {
-            
             Dimension dimension = getDimensionsFromUser("Enter dimensions for " + label);
             if (dimension != null) {
+                // Calculate position for the new room
+                int x = 10; // Default X position
+                int y = 10; // Default Y position
+    
+                if (!layoutComponents.isEmpty()) {
+                    JComponent lastComponent = layoutComponents.get(layoutComponents.size() - 1);
+                    java.awt.Rectangle lastBounds = lastComponent.getBounds();
+                    x = lastBounds.x + lastBounds.width + 10; // Place to the right with a margin
+                    y = lastBounds.y; // Align vertically with the last room
+                }
+    
                 Rooms newRoom = new Rooms(color, dimension.width, dimension.height, layoutComponents, floorPlanPanel);
+                newRoom.setBounds(x, y, dimension.width, dimension.height);
                 floorPlanPanel.add(newRoom);
                 floorPlanPanel.setComponentZOrder(newRoom, floorPlanPanel.getComponentCount() - 1);
                 layoutComponents.add(newRoom);
@@ -331,6 +408,7 @@ class Rooms extends JPanel {
         this.setBackground(color);
         this.setBounds(50, 50, width, height);
         initializeMouseListeners();
+        initializeContextMenu();
     }
 
     private void initializeMouseListeners() {
@@ -359,6 +437,42 @@ class Rooms extends JPanel {
                 }
             }
         });
+    }
+    private void initializeContextMenu() {
+        JPopupMenu contextMenu = new JPopupMenu();
+
+        // Rotate Option
+        JMenuItem rotateItem = new JMenuItem("Rotate 90°");
+        rotateItem.addActionListener(e -> rotate());
+        contextMenu.add(rotateItem);
+
+        // Remove Option
+        JMenuItem removeItem = new JMenuItem("Remove");
+        removeItem.addActionListener(e -> remove());
+        contextMenu.add(removeItem);
+
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    contextMenu.show(Rooms.this, e.getX(), e.getY());
+                }
+            }
+        });
+    }
+
+    private void rotate() {
+        int tempWidth = getWidth();
+        int tempHeight = getHeight();
+        setSize(tempHeight, tempWidth);
+        revalidate();
+        repaint();
+    }
+
+    private void remove() {
+        layoutComponents.remove(this);
+        parentPanel.remove(this);
+        parentPanel.repaint();
     }
 
     private boolean isValidPosition(JComponent comp) {
