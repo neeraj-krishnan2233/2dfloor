@@ -10,8 +10,7 @@ import java.util.List;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-
-public class SNAP {
+public class SNAP implements Runnable {
     private JFrame frame;
     private JPanel floorPlanPanel;
 
@@ -37,7 +36,7 @@ public class SNAP {
         frame.setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public void run(){
         SwingUtilities.invokeLater(SNAP::new);
     }
 }
@@ -74,7 +73,10 @@ class ControlPanel {
         buttonPanel.add(kitchenButton);
         buttonPanel.add(createRigidArea());
         buttonPanel.add(livingButton);
-
+        buttonPanel.add(createRigidArea());
+        JButton doorButton = createFurnitureButton("Add Door", "Dooropen.png", floorPlanPanel);
+        doorButton.setBackground(Color.BLACK);
+        doorButton.setForeground(Color.GREEN);
         JButton sofaButton = createFurnitureButton("Add Sofa", "sofa.png", floorPlanPanel);
         sofaButton.setBackground(Color.BLACK);
         sofaButton.setForeground(Color.GREEN);
@@ -104,7 +106,7 @@ class ControlPanel {
         piano.setForeground(Color.GREEN);
         
 
-
+        buttonPanel.add(doorButton);
         buttonPanel.add(createRigidArea());
         buttonPanel.add(sofaButton);
         buttonPanel.add(createRigidArea());
